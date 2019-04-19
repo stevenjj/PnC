@@ -7,6 +7,7 @@
 #include <osgShadow/LightSpacePerspectiveShadowMap>
 
 #include <Utils/General/Clock.hpp>
+#include <unsupported/Eigen/CXX11/Tensor>
 
 class EnvInterface;
 class DracoSensorData;
@@ -37,8 +38,13 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     dart::dynamics::SkeletonPtr mStar;
     dart::dynamics::SkeletonPtr mTorus;
     Eigen::VectorXd mTorqueCommand;
+    Eigen::VectorXd q_init_;
     int mDof;
     double mReleaseTime;
+    Eigen::VectorXd upper_cart_;
+    Eigen::VectorXd lower_cart_;
+    Eigen::VectorXi num_cart_;
+    double delta_cart_;
 
     int count_;
     double waiting_time_;
@@ -56,6 +62,11 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     bool b_parallel_;
     bool b_calculate_zmp_;
 
+    void UpdateSystem(Eigen::VectorXd&);
+    void UpdateWorkspace(Eigen::Vector3d&, Eigen::Tensor<double, 3>&);
+    void ComputeWorkspace(double);
+    void PrepareWorkspaceAnalysis(double);
+
    public:
     DracoWorldNode(const dart::simulation::WorldPtr& world,
                    osgShadow::MinimalShadowMap*);
@@ -67,6 +78,12 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     Eigen::VectorXd mKp;
     Eigen::VectorXd mKd;
     Eigen::VectorXd q_sim_;
+
+    // workspace
+    Eigen::VectorXd q_limit_u_;
+    Eigen::VectorXd q_limit_l_;
+    double dq_input_;
+    double dx_input_;
 
     dart::simulation::WorldPtr world_;
 

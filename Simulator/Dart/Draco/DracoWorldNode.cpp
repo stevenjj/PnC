@@ -22,6 +22,7 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
     mDof = mSkel->getNumDofs();
     mTorqueCommand = Eigen::VectorXd::Zero(mDof);
     b_parallel_ = true;
+    q_init_ = mSkel->getPositions();
 
     SetParameters_();
 
@@ -74,6 +75,7 @@ DracoWorldNode::DracoWorldNode(const dart::simulation::WorldPtr& _world,
     mDof = mSkel->getNumDofs();
     mTorqueCommand = Eigen::VectorXd::Zero(mDof);
     b_parallel_ = false;
+    q_init_ = mSkel->getPositions();
 
     SetParameters_();
 
@@ -149,13 +151,162 @@ void DracoWorldNode::SetParameters_() {
             b_plot_adjusted_foot_ = false;
             b_camera_manipulator_ = false;
         }
+
+        // workspace analysis
+        YAML::Node ws_cfg = simulation_cfg["workspace_configuration"];
+        myUtils::readParameter(ws_cfg, "upper_limit", q_limit_u_);
+        myUtils::readParameter(ws_cfg, "lower_limit", q_limit_l_);
+        myUtils::readParameter(ws_cfg, "dq_input", dq_input_);
+        myUtils::readParameter(ws_cfg, "dx_input", dx_input_);
+
+        myUtils::readParameter(ws_cfg, "upper_cart", upper_cart_);
+        myUtils::readParameter(ws_cfg, "lower_cart", lower_cart_);
+
+        q_limit_u_ = q_limit_u_ / 180.0 * M_PI;
+        q_limit_l_ = q_limit_l_ / 180.0 * M_PI;
+
     } catch (std::runtime_error& e) {
         std::cout << "Error reading parameter [" << e.what() << "] at file: ["
                   << __FILE__ << "]" << std::endl
                   << std::endl;
     }
 }
+
+void DracoWorldNode::UpdateSystem(Eigen::VectorXd& q_activate) {
+    Eigen::VectorXd q_full = q_init_;
+
+    q_full[6] = q_activate[0];
+    q_full[7] = q_activate[1];
+    q_full[8] = q_activate[2];
+    q_full[9] = q_activate[3];
+
+    // myUtils::pretty_print(q_full, std::cout, "qfull");
+    mSkel->setPositions(q_full);
+    mSkel->computeForwardKinematics(true, false, false);
+}
+
+void DracoWorldNode::UpdateWorkspace(Eigen::Vector3d& pos,
+                                     Eigen::Tensor<double, 3>& Workcount) {
+    Eigen::VectorXd pos_offset(3);
+    pos_offset.setZero();
+
+    pos_offset[0] = pos[0] - lower_cart_[0];
+    pos_offset[1] = pos[1] - lower_cart_[1];
+    pos_offset[2] = pos[2] - lower_cart_[2];
+
+    int room_x = floor(pos_offset[0] / delta_cart_);
+    int room_y = floor(pos_offset[1] / delta_cart_);
+    int room_z = floor(pos_offset[2] / delta_cart_);
+
+    if (room_x > 180 || room_y > 180 || room_z > 180) {
+        std::cout << "max" << std::endl;
+        std::cout << room_x << ", " << room_y << ", " << room_z << std::endl;
+    }
+
+    if (room_x < 0 || room_y < 0 || room_z < 0) {
+        std::cout << "min" << std::endl;
+        std::cout << room_x << ", " << room_y << ", " << room_z << std::endl;
+    }
+    // std::cout << "@@@@@@@@@" << std::endl;
+    // std::cout << room_x << ", " << room_y << ", " << room_z << std::endl;
+
+    Workcount(room_x, room_y, room_z) = Workcount(room_x, room_y, room_z) + 1.0;
+}
+
+void DracoWorldNode::ComputeWorkspace(double rad_interval) {
+    Eigen::VectorXd delta;
+    delta = q_limit_u_ - q_limit_l_;
+    Eigen::VectorXd q_update;
+    q_update = q_limit_u_;
+    Eigen::Vector3d end_pos;
+    end_pos.setZero();
+
+    // total number of iteration
+    int total_iter = 1.0;
+    Eigen::VectorXd Num_iter = delta;
+    for (int i(0); i < Num_iter.size(); ++i) {
+        Num_iter[i] = (int)(delta[i] / rad_interval) + 1;
+    }
+
+    for (int i(0); i < 2; ++i) {
+        total_iter = total_iter * Num_iter[i];
+    }
+
+    myUtils::pretty_print(Num_iter, std::cout, "number_iter");
+    PrepareWorkspaceAnalysis(dx_input_);
+    Eigen::Tensor<double, 3> WorkspaceMap(num_cart_[0], num_cart_[1],
+                                          num_cart_[2]);
+    WorkspaceMap.setZero();
+
+    // start iteration
+    int cur_iter = 0;
+    for (int j1(0); j1 < Num_iter[0]; j1++) {
+        q_update[0] = q_limit_l_[0] + j1 * rad_interval;
+
+        for (int j2(0); j2 < Num_iter[1]; j2++) {
+            q_update[1] = q_limit_l_[1] + j2 * rad_interval;
+
+            for (int j3(0); j3 < Num_iter[2]; j3++) {
+                q_update[2] = q_limit_l_[2] + j3 * rad_interval;
+
+                for (int j4(0); j4 < Num_iter[3]; j4++) {
+                    // std::cout << "==========" << std::endl;
+                    // std::cout << j1 << " , " << j2 << " , " << j3 << " , " <<
+                    // j4
+                    //<< std::endl;
+                    q_update[3] = q_limit_l_[3] + j4 * rad_interval;
+                    UpdateSystem(q_update);
+                    end_pos = mSkel->getBodyNode("lAnkle")
+                                  ->getTransform()
+                                  .translation();
+                    UpdateWorkspace(end_pos, WorkspaceMap);
+                }
+            }
+            cur_iter = cur_iter + 1;
+            std::cout << "[" << cur_iter << "/" << total_iter
+                      << "] Iteration step." << std::endl;
+        }
+    }
+
+    std::cout << "*****[start to save the results]********" << std::endl;
+    int total_save = num_cart_[1] * num_cart_[2];
+    int cur_save = 0;
+    // save the Tensor
+    Eigen::VectorXd res(num_cart_[0]);
+    res.setZero();
+    for (int i(0); i < num_cart_[2]; ++i) {
+        for (int j(0); j < num_cart_[1]; ++j) {
+            for (int k(0); k < num_cart_[0]; ++k) {
+                res[k] = WorkspaceMap(k, j, i);
+            }
+            myUtils::saveVector(res, "work_count");
+            cur_save = cur_save + 1;
+        }
+        std::cout << "[" << cur_save << "/" << total_save
+                  << "] The results are saved." << std::endl;
+    }
+}
+
+void DracoWorldNode::PrepareWorkspaceAnalysis(double dx) {
+    Eigen::VectorXd num_box = (upper_cart_ - lower_cart_) / dx;
+    num_cart_.resize(3);
+    num_cart_.setZero();
+    num_cart_[0] = (int)num_box[0];
+    num_cart_[1] = (int)num_box[1];
+    num_cart_[2] = (int)num_box[2];
+
+    std::cout << "num_cart: " << num_cart_ << std::endl;
+    delta_cart_ = dx;
+}
+
 void DracoWorldNode::customPreStep() {
+    // Workspace Analaysis
+    // std::cout << mSkel->getBodyNode("lAnkle")->getTransform().translation()
+    //<< std::endl;
+    // exit(0);
+    ComputeWorkspace(dq_input_);
+    std::cout << "Workspace Analysis Finished!" << std::endl;
+    exit(0);
     t_ = (double)count_ * servo_rate_;
 
     mSensorData->q = mSkel->getPositions().tail(10);

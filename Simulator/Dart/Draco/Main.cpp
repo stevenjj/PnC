@@ -309,6 +309,7 @@ int main(int argc, char** argv) {
     // =========================================================================
     // Create and Set Viewer
     // =========================================================================
+    b_show = false;
     if (b_show) {
         dart::gui::osg::Viewer viewer;
         viewer.addWorldNode(node);
