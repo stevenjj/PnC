@@ -147,7 +147,7 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
         }
         case 2: {
             YAML::Node simulation_cfg =
-                YAML::LoadFile(THIS_COM "Config/Draco/SIMULATION.yaml");
+                YAML::LoadFile(myUtils::GetCurrentWorkingDirecotry() + "/../Config/Draco/SIMULATION.yaml");
             double hanging_height(0.0);
             myUtils::readParameter(simulation_cfg, "hanging_height",
                                    hanging_height);
@@ -177,7 +177,7 @@ int main(int argc, char** argv) {
     double servo_rate;
     try {
         YAML::Node simulation_cfg =
-            YAML::LoadFile(THIS_COM "Config/Draco/SIMULATION.yaml");
+            YAML::LoadFile(myUtils::GetCurrentWorkingDirecotry() + "/../Config/Draco/SIMULATION.yaml");
         myUtils::readParameter(simulation_cfg, "is_record", isRecord);
         myUtils::readParameter(simulation_cfg, "display_joint_frame",
                                b_display_joint_frame);
@@ -198,9 +198,9 @@ int main(int argc, char** argv) {
     dart::simulation::WorldPtr world(new dart::simulation::World);
     dart::utils::DartLoader urdfLoader;
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
-        THIS_COM "RobotModel/Ground/ground_terrain.urdf");
+        myUtils::GetCurrentWorkingDirecotry() + "/../RobotModel/Ground/ground_terrain.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-        THIS_COM "RobotModel/Robot/Draco/DracoSim_Dart.urdf");
+        myUtils::GetCurrentWorkingDirecotry() + "/../RobotModel/Robot/Draco/DracoSim_Dart.urdf");
     world->addSkeleton(ground);
     world->addSkeleton(robot);
 

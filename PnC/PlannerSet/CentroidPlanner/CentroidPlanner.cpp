@@ -12,8 +12,8 @@ CentroidPlannerParameter::CentroidPlannerParameter(YAML::Node planner_cfg,
     b_req.resize(4, false);
 
     defaultSolverSettingFile =
-        THIS_COM +
-        std::string("Config/Solver/DEFAULT_CONIC_SOLVER_SETTING.yaml");
+        myUtils::GetCurrentWorkingDirecotry() +
+        std::string("/../Config/Solver/DEFAULT_CONIC_SOLVER_SETTING.yaml");
 
     try {
         // =====================================================================
@@ -1214,7 +1214,7 @@ void CentroidPlanner::SaveResult(const std::string& file_name) {
             qcqp_cfg["dynopt_params"]["eef_cop_" + std::to_string(eef_id)] =
                 mMatGuess;
         }
-        std::string full_path = THIS_COM + std::string("ExperimentData/") +
+        std::string full_path = myUtils::GetCurrentWorkingDirecotry() + std::string("/../ExperimentData/") +
                                 file_name + std::string(".yaml");
         std::ofstream file_out(full_path);
         file_out << qcqp_cfg;

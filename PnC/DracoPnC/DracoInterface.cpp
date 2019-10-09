@@ -19,7 +19,7 @@ DracoInterface::DracoInterface() : EnvInterface() {
     myUtils::pretty_constructor(0, "Draco Interface");
 
     robot_ = new RobotSystem(
-        6, THIS_COM "RobotModel/Robot/Draco/DracoSim_Dart.urdf");
+        6, myUtils::GetCurrentWorkingDirecotry() + "/../RobotModel/Robot/Draco/DracoSim_Dart.urdf");
     // robot_->printRobotInfo();
     state_estimator_ = new DracoStateEstimator(robot_);
     sp_ = DracoStateProvider::getStateProvider(robot_);
@@ -89,7 +89,7 @@ void DracoInterface::CropTorque_(DracoCommand* cmd) {
 void DracoInterface::_ParameterSetting() {
     try {
         YAML::Node cfg =
-            YAML::LoadFile(THIS_COM "Config/Draco/INTERFACE.yaml");
+            YAML::LoadFile(myUtils::GetCurrentWorkingDirecotry() + "/../Config/Draco/INTERFACE.yaml");
         std::string test_name =
             myUtils::readParameter<std::string>(cfg, "test_name");
         if (test_name == "balancing_test") {

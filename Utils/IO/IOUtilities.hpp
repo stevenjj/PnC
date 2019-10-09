@@ -80,5 +80,9 @@ namespace myUtils
     std::string pretty_string(Eigen::MatrixXd const & mm, std::string const & prefix);
     std::string pretty_string(double vv);
 
+    // =========================================================================
+    // ETC
+    // =========================================================================
+    std::string GetCurrentWorkingDirecotry();
 
 } /* myUtils */

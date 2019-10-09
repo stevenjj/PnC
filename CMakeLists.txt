@@ -18,13 +18,13 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 ## Build Setup
 ##=============================================================================
 if(APPLE)
-    set(INSTALL_LIB_DIR ${CMAKE_SOURCE_DIR}/../onr_api/mac/lib )
-    set(INSTALL_BIN_DIR ${CMAKE_SOURCE_DIR}/../onr_api/mac/bin )
-    set(INSTALL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../onr_api/mac/include/${PROJECT_NAME})
+    set(INSTALL_LIB_DIR ${CMAKE_SOURCE_DIR}/../onr_project/mac/lib )
+    set(INSTALL_BIN_DIR ${CMAKE_SOURCE_DIR}/../onr_project/mac/bin )
+    set(INSTALL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../onr_project/mac/include/${PROJECT_NAME})
 else()
-    set(INSTALL_LIB_DIR ${CMAKE_SOURCE_DIR}/../onr_api/ubuntu/lib )
-    set(INSTALL_BIN_DIR ${CMAKE_SOURCE_DIR}/../onr_api/ubuntu/bin )
-    set(INSTALL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../onr_api/ubuntu/include/${PROJECT_NAME})
+    set(INSTALL_LIB_DIR ${CMAKE_SOURCE_DIR}/../onr_project/ubuntu/lib )
+    set(INSTALL_BIN_DIR ${CMAKE_SOURCE_DIR}/../onr_project/ubuntu/bin )
+    set(INSTALL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../onr_project/ubuntu/include/${PROJECT_NAME})
 endif()
 
 ##=============================================================================
@@ -82,9 +82,8 @@ endif()
 ##=============================================================================
 ## Copy Aux Dirs
 ##=============================================================================
-file(COPY Config DESTINATION ${CMAKE_SOURCE_DIR}/../onr_api)
-file(COPY RobotModel DESTINATION ${CMAKE_SOURCE_DIR}/../onr_api)
-file(COPY Addition DESTINATION ${CMAKE_SOURCE_DIR}/../onr_api)
+file(COPY Config DESTINATION ${CMAKE_SOURCE_DIR}/../onr_project)
+file(COPY Addition DESTINATION ${CMAKE_SOURCE_DIR}/../onr_project)
 
 
 ##=============================================================================

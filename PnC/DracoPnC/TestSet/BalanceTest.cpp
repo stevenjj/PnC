@@ -8,7 +8,7 @@
 
 BalanceTest::BalanceTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "Balance Test");
-    cfg_ = YAML::LoadFile(THIS_COM "Config/Draco/TEST/BALANCE_TEST.yaml");
+    cfg_ = YAML::LoadFile(myUtils::GetCurrentWorkingDirecotry() + "/../Config/Draco/TEST/BALANCE_TEST.yaml");
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
     phase_ = BLPhase::BALANCE;

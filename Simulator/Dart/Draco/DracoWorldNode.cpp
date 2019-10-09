@@ -200,7 +200,7 @@ void DracoWorldNode::GetContactSwitchData_(bool& rfoot_contact,
 void DracoWorldNode::SetParams_() {
     try {
         YAML::Node simulation_cfg =
-            YAML::LoadFile(THIS_COM "Config/Draco/SIMULATION.yaml");
+            YAML::LoadFile(myUtils::GetCurrentWorkingDirecotry() + "/../Config/Draco/SIMULATION.yaml");
         myUtils::readParameter(simulation_cfg, "servo_rate", servo_rate_);
         myUtils::readParameter(simulation_cfg["control_configuration"], "kp",
                                kp_);

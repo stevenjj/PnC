@@ -10,7 +10,7 @@
 
 WalkingTest::WalkingTest(RobotSystem* robot) : Test(robot) {
     myUtils::pretty_constructor(1, "Walking Test");
-    cfg_ = YAML::LoadFile(THIS_COM "Config/Draco/TEST/WALKING_SIM_TEST.yaml");
+    cfg_ = YAML::LoadFile(myUtils::GetCurrentWorkingDirecotry() + "/../Config/Draco/TEST/WALKING_SIM_TEST.yaml");
 
     num_step_ = 0;
     sp_ = DracoStateProvider::getStateProvider(robot_);

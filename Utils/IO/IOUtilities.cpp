@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <stdio.h>
 
 namespace myUtils {
 
@@ -343,4 +344,12 @@ bool isEqual(const Eigen::VectorXd a, const Eigen::VectorXd b,
     }
     return ret;
 }
+
+std::string GetCurrentWorkingDirecotry(){
+  char buff[FILENAME_MAX];
+  getcwd( buff, FILENAME_MAX );
+  std::string current_working_dir(buff);
+  return current_working_dir;
+}
+
 }  // namespace myUtils
