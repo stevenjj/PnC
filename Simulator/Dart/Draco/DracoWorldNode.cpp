@@ -91,7 +91,6 @@ void DracoWorldNode::customPreStep() {
 */
     Interface_->getCommand(SensorData_, Command_);
 
-
     if (b_plot_mpc_result_) {
         if (((DracoInterface*)Interface_)->IsTrajectoryUpdated()) {
             PlotMPCResult_();
@@ -100,6 +99,7 @@ void DracoWorldNode::customPreStep() {
 
     trq_cmd_.tail(n_dof_ - 6) = Command_->jtrq;
     myUtils::pretty_print(trq_cmd_, std::cout, "torques");
+    
     for (int i = 0; i < n_dof_ - 6; ++i) {
         trq_cmd_[i + 6] += kp_[i] * (Command_->q[i] - SensorData_->q[i]) +
                            kd_[i] * (Command_->qdot[i] - SensorData_->qdot[i]);
