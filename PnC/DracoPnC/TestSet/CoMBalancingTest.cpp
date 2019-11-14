@@ -16,7 +16,7 @@ CoMBalancingTest::CoMBalancingTest(RobotSystem* robot) : Test(robot) {
 
     sp_ = DracoStateProvider::getStateProvider(robot_);
 
-    // state_list_.push_back(jpos_target_ctrl_);
+    state_list_.push_back(jpos_target_ctrl_);
     state_list_.push_back(body_lift_ctrl_);
     state_list_.push_back(com_ctrl_);
 

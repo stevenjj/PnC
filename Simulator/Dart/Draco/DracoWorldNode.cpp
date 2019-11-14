@@ -136,7 +136,7 @@ void DracoWorldNode::customPreStep() {
     double release_time = 10.0;
     if (t_ <= release_time){
         _hold_xy();
-        _hold_rot();        
+        // _hold_rot();        
     }
 
     robot_->setForces(trq_cmd_);
