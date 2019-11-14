@@ -20,6 +20,9 @@ class DracoWorldNode : public dart::gui::osg::WorldNode {
     void PlotMPCResult_();
     void GetForceTorqueData_();
 
+    void _hold_xy();
+    void _hold_rot();
+
     dart::simulation::WorldPtr world_;
     dart::dynamics::SkeletonPtr robot_;
     dart::dynamics::SkeletonPtr ground_;

@@ -3,6 +3,7 @@
 #include <PnC/RobotSystem/RobotSystem.hpp>
 #include <PnC/DracoPnC/TestSet/BalanceTest.hpp>
 #include <PnC/DracoPnC/TestSet/WalkingTest.hpp>
+#include <PnC/DracoPnC/TestSet/CoMBalancingTest.hpp>
 #include <PnC/DracoPnC/DracoInterface.hpp>
 #include <PnC/DracoPnC/DracoStateEstimator.hpp>
 #include <PnC/DracoPnC/DracoStateProvider.hpp>
@@ -97,6 +98,9 @@ void DracoInterface::_ParameterSetting() {
         } 
         else if (test_name == "walking_test") {
             test_ = new WalkingTest(robot_);
+        } 
+        else if (test_name == "com_balancing_test") {
+            test_ = new CoMBalancingTest(robot_);
         } else {
             printf(
                 "[Draco Interface] There is no test matching test with "

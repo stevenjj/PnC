@@ -32,6 +32,32 @@ DracoWorldNode::~DracoWorldNode() {
     delete Command_;
 }
 
+void DracoWorldNode::_hold_xy() {
+    static double des_x = (robot_->getPositions())[0];
+    static double des_y = (robot_->getPositions())[1];
+    static double des_xdot(0.);
+    static double des_ydot(0.);
+
+    Eigen::VectorXd q = robot_->getPositions();
+    Eigen::VectorXd v = robot_->getVelocities();
+
+    double kp(1500);
+    double kd(10);
+
+    trq_cmd_[0] = kp * (des_x - q[0]) + kd * (des_xdot - v[0]);
+    trq_cmd_[1] = kp * (des_y - q[1]) + kd * (des_ydot - v[1]);
+}
+
+void DracoWorldNode::_hold_rot() {
+    Eigen::VectorXd q = robot_->getPositions();
+    Eigen::VectorXd v = robot_->getVelocities();
+    double kp(200);
+    double kd(5);
+    trq_cmd_[3] = kp * (-q[3]) + kd * (-v[3]);
+    trq_cmd_[4] = kp * (-q[4]) + kd * (-v[4]);
+    trq_cmd_[5] = kp * (-q[5]) + kd * (-v[5]);
+}
+
 void DracoWorldNode::customPreStep() {
     t_ = (double)count_ * servo_rate_;
 
@@ -105,6 +131,13 @@ void DracoWorldNode::customPreStep() {
                            kd_[i] * (Command_->qdot[i] - SensorData_->qdot[i]);
     }
     trq_cmd_.head(6).setZero();
+
+
+    double release_time = 10.0;
+    if (t_ <= release_time){
+        _hold_xy();
+        _hold_rot();        
+    }
 
     robot_->setForces(trq_cmd_);
 
