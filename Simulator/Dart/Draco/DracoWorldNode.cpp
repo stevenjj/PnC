@@ -44,6 +44,7 @@ void DracoWorldNode::customPreStep() {
                           SensorData_->lfoot_contact);
     GetForceTorqueData_();
 
+/*
     // Walking Interface Example
     static bool b_first_cmd(true);
     if (t_ > 1. && b_first_cmd) {
@@ -87,8 +88,9 @@ void DracoWorldNode::customPreStep() {
         ((DracoInterface*)Interface_)->Walk(0., 0.3, 0.33, 0., 7);
         b_seventh_cmd = false;
     }
-
+*/
     Interface_->getCommand(SensorData_, Command_);
+
 
     if (b_plot_mpc_result_) {
         if (((DracoInterface*)Interface_)->IsTrajectoryUpdated()) {
@@ -97,6 +99,7 @@ void DracoWorldNode::customPreStep() {
     }
 
     trq_cmd_.tail(n_dof_ - 6) = Command_->jtrq;
+    myUtils::pretty_print(trq_cmd_, std::cout, "torques");
     for (int i = 0; i < n_dof_ - 6; ++i) {
         trq_cmd_[i + 6] += kp_[i] * (Command_->q[i] - SensorData_->q[i]) +
                            kd_[i] * (Command_->qdot[i] - SensorData_->qdot[i]);
