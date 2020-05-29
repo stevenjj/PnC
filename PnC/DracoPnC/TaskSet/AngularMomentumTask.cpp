@@ -53,16 +53,16 @@ bool AngularMomentumTask::_UpdateTaskJacobian() {
 }
 
 bool AngularMomentumTask::_UpdateTaskJDotQdot() {
-	// Numerical Approximation
-	Agdot_ = (1.0/dt_eps_)*(Ag_cur_ - Ag_prev_); 
+	// // Numerical Approximation
+	// Agdot_ = (1.0/dt_eps_)*(Ag_cur_ - Ag_prev_); 
 
-	// If we have at least gone through once store the numerical computation
-	if (first_pass_){
-    	JtDotQdot_ = Agdot_* robot_->getQdot() ;
-	}else{
-		JtDotQdot_.setZero(); // otherwise set the numerical approximation to zero
-		first_pass_ = true; // enable flag
-	}
+	// // If we have at least gone through once store the numerical computation
+	// if (first_pass_){
+ //    	JtDotQdot_ = Agdot_* robot_->getQdot() ;
+	// }else{
+	// 	JtDotQdot_.setZero(); // otherwise set the numerical approximation to zero
+	// 	first_pass_ = true; // enable flag
+	// }
 
     return true;
 }
